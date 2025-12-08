@@ -2,6 +2,7 @@ import time
 from drone_state import DroneState
 from state_estimator import StateEstimator
 from pid import pid_x, pid_y, pid_z
+from utils.logger import DataLogger
 
 
 class Controller:
@@ -23,6 +24,7 @@ class Controller:
         """
         self.drone = drone_interface
         self.state_estimator = StateEstimator()
+        self.logger = DataLogger(filename="pid_flight.csv")
 
         # Desired hover point (x=0, y=0, z=target_altitude)
         self.setpoint = {
@@ -64,6 +66,7 @@ class Controller:
 
         while self.running:
             loop_start = time.time()
+            timestamp = loop_start  # unified timestamp for this iteration
 
             # ---------------------------------------
             # 1. Pull raw sensor data
@@ -78,27 +81,45 @@ class Controller:
             # ---------------------------------------
             # 3. Compute PID corrections
             # ---------------------------------------
-            # X-axis (left/right)
             lr_cmd = pid_x.compute(self.setpoint["x"], est.position[0])
-
-            # Y-axis (forward/back)
             fb_cmd = pid_y.compute(self.setpoint["y"], est.position[1])
-
-            # Z-axis (up/down)
             ud_cmd = pid_z.compute(self.setpoint["z"], est.position[2])
-
-            # No yaw control for now (0)
-            yaw_cmd = 0
+            yaw_cmd = 0  # no yaw control yet
 
             # ---------------------------------------
-            # 4. Send RC command to drone
+            # 4. Log data (now includes loop_dt)
+            # ---------------------------------------
+            elapsed = time.time() - loop_start
+
+            self.logger.log({
+                "time": timestamp,
+                "loop_dt": elapsed,
+                "x": est.position[0],
+                "y": est.position[1],
+                "z": est.position[2],
+                "vx": est.velocity[0],
+                "vy": est.velocity[1],
+                "vz": est.velocity[2],
+                "pitch": est.attitude[0],
+                "roll": est.attitude[1],
+                "yaw": est.attitude[2],
+                "pid_x": lr_cmd,
+                "pid_y": fb_cmd,
+                "pid_z": ud_cmd,
+                "rc_lr": lr_cmd,
+                "rc_fb": fb_cmd,
+                "rc_ud": ud_cmd,
+                "rc_yaw": yaw_cmd
+            })
+
+            # ---------------------------------------
+            # 5. Send RC command to drone
             # ---------------------------------------
             self.drone.send_rc(lr_cmd, fb_cmd, ud_cmd, yaw_cmd)
 
             # ---------------------------------------
-            # 5. Maintain loop timing
+            # 6. Maintain loop timing
             # ---------------------------------------
-            elapsed = time.time() - loop_start
             sleep_time = self.loop_dt - elapsed
             if sleep_time > 0:
                 time.sleep(sleep_time)
@@ -106,3 +127,4 @@ class Controller:
     def stop(self):
         """External stop trigger for fail safes."""
         self.running = False
+        self.logger.close()
