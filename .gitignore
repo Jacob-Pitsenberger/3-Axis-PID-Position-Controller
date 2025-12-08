@@ -1,0 +1,45 @@
+# -------------------------
+# PyCharm / JetBrains
+# -------------------------
+.idea/
+*.iml
+
+# -------------------------
+# Python cache / build
+# -------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+build/
+dist/
+
+# -------------------------
+# Virtual environments
+# -------------------------
+venv/
+env/
+.venv/
+ENV/
+
+# -------------------------
+# OS-specific files
+# -------------------------
+.DS_Store
+Thumbs.db
+
+# -------------------------
+# Logs / temp files
+# -------------------------
+*.log
+*.tmp
+*.swp
+*.swo
+
+# -------------------------
+# Jupyter (if used later)
+# -------------------------
+.ipynb_checkpoints/
