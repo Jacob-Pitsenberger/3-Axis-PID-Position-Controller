@@ -43,8 +43,8 @@ class Controller:
         print("Connecting to drone...")
         self.drone.connect()
 
-        print("Taking off...")
-        self.drone.takeoff()
+        # print("Taking off...")
+        # self.drone.takeoff()
 
         print("Stabilizing before starting PID loop...")
         time.sleep(2.0)
@@ -54,8 +54,9 @@ class Controller:
         except KeyboardInterrupt:
             print("Kill switch activated.")
         finally:
-            print("Landing...")
-            self.drone.land()
+            print("Exiting...")
+            # print("Landing...")
+            # self.drone.land()
 
     def control_loop(self):
         """Main PID control loop running at ~25 Hz."""
