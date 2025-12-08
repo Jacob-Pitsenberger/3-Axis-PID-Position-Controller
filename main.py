@@ -1,15 +1,27 @@
-from djitellopy import tello
+from drone_interface import DroneInterface
+from controller import Controller
 
 
 def main():
-	# Connect to the drone and start receiving video
-	drone = tello.Tello()
-	drone.connect()
-	drone.takeoff()
-	# while True:
-		# run PID RC control sending until the user issues a key press to land the drone.
+    """
+    Entry point for the 3-axis PID position controller.
+    Initializes the drone interface and starts the control loop.
+    """
+    drone = DroneInterface()
 
-	drone.land()
+    # Target hover altitude in meters
+    target_altitude = 0.5
+
+    controller = Controller(drone_interface=drone, target_altitude=target_altitude)
+
+    try:
+        controller.start()
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+    finally:
+        print("Shutting down controller...")
+        controller.stop()
+
 
 if __name__ == "__main__":
-	main()
+    main()
