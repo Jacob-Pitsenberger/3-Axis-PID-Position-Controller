@@ -1,20 +1,20 @@
 {
-  "pid_x": {
-    "kp": 40.0,
+    "pid_x": {
+    "kp": 80.0,
     "ki": 0.0,
     "kd": 20.0,
-    "output_limits": [-100, 100],
-    "integral_limits": [-30, 30],
-    "derivative_filter_alpha": 0.6
+    "output_limits": [-40, 40],
+    "integral_limits": [-10, 10],
+    "derivative_filter_alpha": 0.7
   },
 
   "pid_y": {
-    "kp": 40.0,
+    "kp": 80.0,
     "ki": 0.0,
     "kd": 20.0,
-    "output_limits": [-100, 100],
-    "integral_limits": [-30, 30],
-    "derivative_filter_alpha": 0.6
+    "output_limits": [-40, 40],
+    "integral_limits": [-10, 10],
+    "derivative_filter_alpha": 0.7
   },
 
   "pid_z": {
