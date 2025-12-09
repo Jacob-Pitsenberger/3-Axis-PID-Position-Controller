@@ -94,6 +94,8 @@ class Controller:
             self.logger.log({
                 "time": timestamp,
                 "loop_dt": elapsed,
+
+                # --- Estimated state (already logged) ---
                 "x": est.position[0],
                 "y": est.position[1],
                 "z": est.position[2],
@@ -103,13 +105,36 @@ class Controller:
                 "pitch": est.attitude[0],
                 "roll": est.attitude[1],
                 "yaw": est.attitude[2],
+
+                # --- PID outputs ---
                 "pid_x": lr_cmd,
                 "pid_y": fb_cmd,
                 "pid_z": ud_cmd,
+
+                # --- RC commands sent to drone ---
                 "rc_lr": lr_cmd,
                 "rc_fb": fb_cmd,
                 "rc_ud": ud_cmd,
-                "rc_yaw": yaw_cmd
+                "rc_yaw": yaw_cmd,
+
+                # --- RAW SENSOR VALUES (NEW) ---
+                "tof_cm": raw_state.elevation[0],
+                "barometer_m": raw_state.elevation[1],
+                "height_cm": raw_state.elevation[2],
+
+                "agx": raw_state.acceleration[0],
+                "agy": raw_state.acceleration[1],
+                "agz": raw_state.acceleration[2],
+
+                "vel_raw_x": raw_state.velocity[0],
+                "vel_raw_y": raw_state.velocity[1],
+                "vel_raw_z": raw_state.velocity[2],
+
+                "pitch_raw": raw_state.orientation[0],
+                "roll_raw": raw_state.orientation[1],
+                "yaw_raw": raw_state.orientation[2],
+
+                "battery:": raw_state.battery
             })
 
             # ---------------------------------------

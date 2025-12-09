@@ -63,7 +63,8 @@ class DroneInterface:
                 self.drone.get_acceleration_x(),
                 self.drone.get_acceleration_y(),
                 self.drone.get_acceleration_z()
-            ]
+            ],
+            battery = self.drone.get_battery()
         )
 
     # ---------------------------------------------------------

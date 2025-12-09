@@ -6,3 +6,4 @@ class DroneState:
     velocity: list      # [vgx, vgy, vgz]
     elevation: list     # [tof, baro, height]
     acceleration: list  # [agx, agy, agz]
+    battery: int
