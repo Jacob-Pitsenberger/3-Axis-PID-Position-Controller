@@ -1,4 +1,4 @@
-from drone_interface import DroneInterface
+from drone.drone_interface import DroneInterface
 from controller import Controller
 
 

@@ -1,5 +1,4 @@
 import time
-from drone_state import DroneState
 from state_estimator import StateEstimator
 from pid import pid_x, pid_y, pid_z
 from utils.logger import DataLogger

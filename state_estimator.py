@@ -1,6 +1,6 @@
 import time
 from dataclasses import dataclass
-from drone_state import DroneState
+from drone.drone_state import DroneState
 from utils.transforms import body_to_world_velocity
 
 @dataclass
