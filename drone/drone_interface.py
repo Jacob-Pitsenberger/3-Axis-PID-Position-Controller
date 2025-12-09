@@ -1,5 +1,5 @@
 from djitellopy import Tello
-from drone_state import DroneState
+from .drone_state import DroneState
 
 
 class DroneInterface:
