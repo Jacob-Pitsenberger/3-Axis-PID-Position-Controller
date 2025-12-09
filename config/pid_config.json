@@ -24,5 +24,14 @@
     "output_limits": [-40, 40],
     "integral_limits": [-10, 10],
     "derivative_filter_alpha": 0.7
+  },
+
+  "pid_yaw": {
+    "kp": 80.0,
+    "ki": 0.0,
+    "kd": 30.0,
+    "output_limits": [-60, 60],
+    "integral_limits": [-20, 20],
+    "derivative_filter_alpha": 0.7
   }
 }

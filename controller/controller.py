@@ -1,6 +1,6 @@
 import time
 from .state_estimator import StateEstimator
-from control.pid import pid_x, pid_y, pid_z
+from control.pid import pid_x, pid_y, pid_z, pid_yaw
 from utils.logger import DataLogger
 
 
@@ -39,6 +39,9 @@ class Controller:
         # Failsafe flag
         self.running = True
 
+        # Initialize yaw target (set properly after takeoff)
+        self.target_yaw = None
+
     def start(self):
         """Initialize drone and begin control loop."""
         print("Connecting to drone...")
@@ -52,6 +55,11 @@ class Controller:
 
         # Reset estimator AFTER takeoff and stabilization
         self.state_estimator.reset()
+
+        # Lock yaw heading at takeoff
+        initial_state = self.drone.get_state()
+        self.target_yaw = initial_state.orientation[2]
+
         print("estimator reset... Starting PID loop...")
 
         try:
@@ -62,6 +70,19 @@ class Controller:
             print("Exiting...")
             print("Landing...")
             self.drone.land()
+
+    @staticmethod
+    def _angle_difference(target, current):
+        """
+        Compute the shortest signed angular difference between two yaw angles (degrees).
+        Ensures result is in [-180, 180].
+        """
+        diff = target - current
+        while diff > 180:
+            diff -= 360
+        while diff < -180:
+            diff += 360
+        return diff
 
     def control_loop(self):
         """Main PID control loop running at ~25 Hz."""
@@ -84,10 +105,15 @@ class Controller:
             # ---------------------------------------
             # 3. Compute PID corrections
             # ---------------------------------------
+
+            # --- X/Y/Z PID corrections ---
             lr_cmd = pid_x.compute(self.setpoint["x"], est.position[0])
             fb_cmd = pid_y.compute(self.setpoint["y"], est.position[1])
             ud_cmd = pid_z.compute(self.setpoint["z"], est.position[2])
-            yaw_cmd = 0  # no yaw control yet
+
+            # --- Yaw PID correction ---
+            yaw_error = self._angle_difference(self.target_yaw, est.attitude[2])
+            yaw_cmd = pid_yaw.compute(0.0, yaw_error)  # setpoint = 0 (no yaw error)
 
             # ---------------------------------------
             # 4. Log data (now includes loop_dt)
@@ -136,6 +162,8 @@ class Controller:
                 "pitch_raw": raw_state.orientation[0],
                 "roll_raw": raw_state.orientation[1],
                 "yaw_raw": raw_state.orientation[2],
+
+                "pid_yaw": yaw_cmd,
 
                 "battery:": raw_state.battery
             })
