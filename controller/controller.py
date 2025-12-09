@@ -50,6 +50,10 @@ class Controller:
         print("Stabilizing before starting PID loop...")
         time.sleep(2.0)
 
+        # Reset estimator AFTER takeoff and stabilization
+        self.state_estimator.reset()
+        print("estimator reset... Starting PID loop...")
+
         try:
             self.control_loop()
         except KeyboardInterrupt:

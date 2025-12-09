@@ -112,3 +112,13 @@ class StateEstimator:
         )
 
         return est
+
+    def reset(self):
+        """Reset estimator state, including altitude baselines."""
+        self.x = 0.0
+        self.y = 0.0
+        self.prev_time = None
+        self.prev_z = 0.0
+        self._baseline_tof_m = None
+        self._baseline_baro_m = None
+        self._baseline_height_m = None
