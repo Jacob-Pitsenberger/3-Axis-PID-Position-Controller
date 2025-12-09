@@ -1,0 +1,28 @@
+{
+  "pid_x": {
+    "kp": 40.0,
+    "ki": 0.0,
+    "kd": 20.0,
+    "output_limits": [-100, 100],
+    "integral_limits": [-30, 30],
+    "derivative_filter_alpha": 0.6
+  },
+
+  "pid_y": {
+    "kp": 40.0,
+    "ki": 0.0,
+    "kd": 20.0,
+    "output_limits": [-100, 100],
+    "integral_limits": [-30, 30],
+    "derivative_filter_alpha": 0.6
+  },
+
+  "pid_z": {
+    "kp": 60.0,
+    "ki": 0.0,
+    "kd": 30.0,
+    "output_limits": [-100, 100],
+    "integral_limits": [-20, 20],
+    "derivative_filter_alpha": 0.7
+  }
+}

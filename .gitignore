@@ -43,3 +43,8 @@ Thumbs.db
 # Jupyter (if used later)
 # -------------------------
 .ipynb_checkpoints/
+
+# -------------------------
+# PID tuning configuration
+# -------------------------
+config/*.local.json
