@@ -5,7 +5,7 @@
     "kd": 20.0,
     "output_limits": [-40, 40],
     "integral_limits": [-10, 10],
-    "derivative_filter_alpha": 0.7
+    "derivative_filter_alpha": 0.8
   },
 
   "pid_y": {
@@ -14,7 +14,7 @@
     "kd": 20.0,
     "output_limits": [-40, 40],
     "integral_limits": [-10, 10],
-    "derivative_filter_alpha": 0.7
+    "derivative_filter_alpha": 0.8
   },
 
   "pid_z": {
@@ -23,7 +23,7 @@
     "kd": 10.0,
     "output_limits": [-40, 40],
     "integral_limits": [-10, 10],
-    "derivative_filter_alpha": 0.7
+    "derivative_filter_alpha": 0.8
   },
 
   "pid_yaw": {
@@ -32,6 +32,6 @@
     "kd": 30.0,
     "output_limits": [-60, 60],
     "integral_limits": [-20, 20],
-    "derivative_filter_alpha": 0.7
+    "derivative_filter_alpha": 0.8
   }
 }
