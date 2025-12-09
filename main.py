@@ -1,5 +1,5 @@
 from drone.drone_interface import DroneInterface
-from controller import Controller
+from controller.controller import Controller
 
 
 def main():
