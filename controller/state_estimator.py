@@ -34,17 +34,35 @@ class StateEstimator:
         # Previous fused altitude
         self.prev_z = 0.0
 
+        # Altitude baselines (set on first estimate call)
+        self._baseline_tof_m = None
+        self._baseline_baro_m = None
+        self._baseline_height_m = None
+
     def _fuse_altitude(self, elevation):
         """
         Fuse ToF, barometer, and height into a stable altitude estimate.
         elevation = [tof_cm, baro_m, height_cm]
+
+        Returns altitude in meters, relative to the baseline at takeoff.
         """
         tof_m = elevation[0] / 100.0
         baro_m = elevation[1]
         height_m = elevation[2] / 100.0
 
+        # Initialize baselines at first call (assumed near ground / takeoff)
+        if self._baseline_tof_m is None:
+            self._baseline_tof_m = tof_m
+            self._baseline_baro_m = baro_m
+            self._baseline_height_m = height_m
+
+        # Work in relative terms
+        rel_tof = tof_m - self._baseline_tof_m
+        rel_baro = baro_m - self._baseline_baro_m
+        rel_height = height_m - self._baseline_height_m
+
         # ToF is accurate at low altitudes, height is stable, baro is smooth
-        raw_z = 0.5 * tof_m + 0.3 * height_m + 0.2 * baro_m
+        raw_z = 0.5 * rel_tof + 0.3 * rel_height + 0.2 * rel_baro
 
         # Complementary filter for smoothing
         if self.prev_time is None:
