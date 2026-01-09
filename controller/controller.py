@@ -106,9 +106,15 @@ class Controller:
             # 3. Compute PID corrections
             # ---------------------------------------
 
+            # Velocity damping (feedforward)
+            vx = est.velocity[0]
+            vy = est.velocity[1]
+
+            vel_damping_gain = 15.0  # safe starting value
+
             # --- X/Y/Z PID corrections ---
-            lr_cmd = pid_x.compute(self.setpoint["x"], est.position[0])
-            fb_cmd = pid_y.compute(self.setpoint["y"], est.position[1])
+            lr_cmd = pid_x.compute(self.setpoint["x"], est.position[0]) - vel_damping_gain * vx
+            fb_cmd = pid_y.compute(self.setpoint["y"], est.position[1]) - vel_damping_gain * vy
             ud_cmd = pid_z.compute(self.setpoint["z"], est.position[2])
 
             # --- Yaw PID correction ---
