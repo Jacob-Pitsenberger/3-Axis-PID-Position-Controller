@@ -1,7 +1,7 @@
 {
-    "pid_x": {
-    "kp": 90.0,
-    "ki": 0.02,
+  "pid_x": {
+    "kp": 85.0,
+    "ki": 0.015,
     "kd": 20.0,
     "output_limits": [-60, 60],
     "integral_limits": [-5, 5],
@@ -9,8 +9,8 @@
   },
 
   "pid_y": {
-    "kp": 90.0,
-    "ki": 0.02,
+    "kp": 85.0,
+    "ki": 0.015,
     "kd": 20.0,
     "output_limits": [-60, 60],
     "integral_limits": [-5, 5],
