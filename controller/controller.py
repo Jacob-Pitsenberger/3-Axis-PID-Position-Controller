@@ -122,6 +122,11 @@ class Controller:
             yaw_error = self._angle_difference(self.target_yaw, est.attitude[2])
             yaw_cmd = pid_yaw.compute(0.0, yaw_error)  # setpoint = 0 (no yaw error)
 
+            # Yaw-rate damping (helps prevent yaw drift and overshoot)
+            yaw_rate = est.angular_velocity[2]
+            yaw_damping_gain = 0.5  # safe starting value
+            yaw_cmd -= yaw_damping_gain * yaw_rate
+
             # ---------------------------------------
             # 4. Log data (now includes loop_dt)
             # ---------------------------------------
