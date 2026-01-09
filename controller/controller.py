@@ -110,7 +110,8 @@ class Controller:
             vx = est.velocity[0]
             vy = est.velocity[1]
 
-            vel_damping_gain = 15.0  # safe starting value
+            # Started with value of 15 but this was too aggressive and testing logs showed it occasionally overpowering Tello's internal stabilization.
+            vel_damping_gain = 10.0  # Reducing the value to 10 should minimize the 'fight' between my PID controller and the Tello's internal controller.
 
             # --- X/Y/Z PID corrections ---
             lr_cmd = pid_x.compute(self.setpoint["x"], est.position[0]) - vel_damping_gain * vx
