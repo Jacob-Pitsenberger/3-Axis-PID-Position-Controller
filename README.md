@@ -133,6 +133,6 @@ The controller is still in an active tuning phase and has not yet reached a full
 
 ## **📄 License**
 
-This project is released under the MIT License.
+This project is released under the [MIT License](LICENSE.md).
 
 
