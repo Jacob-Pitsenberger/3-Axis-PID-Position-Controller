@@ -147,7 +147,7 @@ class Controller:
 
             # Yaw-rate damping (helps prevent yaw drift and overshoot)
             yaw_rate = est.angular_velocity[2]
-            yaw_damping_gain = 0.5  # safe starting value
+            yaw_damping_gain = 0.7  # was 0.5
             yaw_cmd -= yaw_damping_gain * yaw_rate
 
             # ---------------------------------------

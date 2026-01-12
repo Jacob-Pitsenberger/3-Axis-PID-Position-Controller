@@ -18,19 +18,19 @@
   },
 
   "pid_z": {
-    "kp": 18.0,
-    "ki": 0.0,
-    "kd": 8.0,
+    "kp": 19.0,
+    "ki": 0.01,
+    "kd": 7.0,
     "output_limits": [-40, 40],
-    "integral_limits": [-10, 10],
+    "integral_limits": [-5, 5],
     "derivative_filter_alpha": 0.8
   },
 
   "pid_yaw": {
-    "kp": 50.0,
+    "kp": 45.0,
     "ki": 0.0,
     "kd": 15.0,
-    "output_limits": [-40, 40],
+    "output_limits": [-35, 35],
     "integral_limits": [-20, 20],
     "derivative_filter_alpha": 0.8
   }
