@@ -110,8 +110,28 @@ class Controller:
             vx = est.velocity[0]
             vy = est.velocity[1]
 
-            # Started with value of 15 but this was too aggressive and testing logs showed it occasionally overpowering Tello's internal stabilization.
-            vel_damping_gain = 10.0  # Reducing the value to 10 should minimize the 'fight' between my PID controller and the Tello's internal controller.
+            # ------------------------------------------------------------
+            # Velocity damping (feed‑forward D-on-velocity term)
+            #
+            # History of tested values:
+            #   15.0 → First implementation. Provided strong drift suppression,
+            #           but logs showed it frequently overpowered the Tello’s
+            #           internal stabilization loop, causing lateral “fighting”
+            #           and occasional altitude coupling.
+            #
+            #   10.0 → Reduced aggressiveness. This eliminated the worst
+            #           controller conflicts, but flight logs still showed
+            #           mild forward/right drift and noticeable Z‑axis bounce
+            #           when the drone tilted to correct position error.
+            #
+            # Next test value:
+            #    8.0 → Further softening the damping term to reduce the
+            #           amount of thrust lost to tilt‑induced compensation.
+            #           The goal is to keep horizontal corrections effective
+            #           while reducing vertical oscillation and improving
+            #           hover smoothness.
+            # ------------------------------------------------------------
+            vel_damping_gain = 8.0
 
             # --- X/Y/Z PID corrections ---
             lr_cmd = pid_x.compute(self.setpoint["x"], est.position[0]) - vel_damping_gain * vx
