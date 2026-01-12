@@ -42,6 +42,9 @@ class Controller:
         # Initialize yaw target (set properly after takeoff)
         self.target_yaw = None
 
+        self.log_counter = 0
+        self.log_every_n = 5  # log at ~5 Hz if loop is 25 Hz
+
     def start(self):
         """Initialize drone and begin control loop."""
         print("Connecting to drone...")
@@ -152,53 +155,42 @@ class Controller:
             # ---------------------------------------
             elapsed = time.time() - loop_start
 
-            self.logger.log({
-                "time": timestamp,
-                "loop_dt": elapsed,
-
-                # --- Estimated state (already logged) ---
-                "x": est.position[0],
-                "y": est.position[1],
-                "z": est.position[2],
-                "vx": est.velocity[0],
-                "vy": est.velocity[1],
-                "vz": est.velocity[2],
-                "pitch": est.attitude[0],
-                "roll": est.attitude[1],
-                "yaw": est.attitude[2],
-
-                # --- PID outputs ---
-                "pid_x": lr_cmd,
-                "pid_y": fb_cmd,
-                "pid_z": ud_cmd,
-
-                # --- RC commands sent to drone ---
-                "rc_lr": lr_cmd,
-                "rc_fb": fb_cmd,
-                "rc_ud": ud_cmd,
-                "rc_yaw": yaw_cmd,
-
-                # --- RAW SENSOR VALUES (NEW) ---
-                "tof_cm": raw_state.elevation[0],
-                "barometer_m": raw_state.elevation[1],
-                "height_cm": raw_state.elevation[2],
-
-                "agx": raw_state.acceleration[0],
-                "agy": raw_state.acceleration[1],
-                "agz": raw_state.acceleration[2],
-
-                "vel_raw_x": raw_state.velocity[0],
-                "vel_raw_y": raw_state.velocity[1],
-                "vel_raw_z": raw_state.velocity[2],
-
-                "pitch_raw": raw_state.orientation[0],
-                "roll_raw": raw_state.orientation[1],
-                "yaw_raw": raw_state.orientation[2],
-
-                "pid_yaw": yaw_cmd,
-
-                "battery:": raw_state.battery
-            })
+            self.log_counter += 1
+            if self.log_counter % self.log_every_n == 0:
+                self.logger.log({
+                    "time": timestamp,
+                    "loop_dt": elapsed,
+                    "x": est.position[0],
+                    "y": est.position[1],
+                    "z": est.position[2],
+                    "vx": est.velocity[0],
+                    "vy": est.velocity[1],
+                    "vz": est.velocity[2],
+                    "pitch": est.attitude[0],
+                    "roll": est.attitude[1],
+                    "yaw": est.attitude[2],
+                    "pid_x": lr_cmd,
+                    "pid_y": fb_cmd,
+                    "pid_z": ud_cmd,
+                    "rc_lr": lr_cmd,
+                    "rc_fb": fb_cmd,
+                    "rc_ud": ud_cmd,
+                    "rc_yaw": yaw_cmd,
+                    "tof_cm": raw_state.elevation[0],
+                    "barometer_m": raw_state.elevation[1],
+                    "height_cm": raw_state.elevation[2],
+                    "agx": raw_state.acceleration[0],
+                    "agy": raw_state.acceleration[1],
+                    "agz": raw_state.acceleration[2],
+                    "vel_raw_x": raw_state.velocity[0],
+                    "vel_raw_y": raw_state.velocity[1],
+                    "vel_raw_z": raw_state.velocity[2],
+                    "pitch_raw": raw_state.orientation[0],
+                    "roll_raw": raw_state.orientation[1],
+                    "yaw_raw": raw_state.orientation[2],
+                    "pid_yaw": yaw_cmd,
+                    "battery": raw_state.battery
+                })
 
             # ---------------------------------------
             # 5. Send RC command to drone
