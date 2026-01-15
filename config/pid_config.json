@@ -19,7 +19,7 @@
 
   "pid_z": {
     "kp": 19.0,
-    "ki": 0.01,
+    "ki": 0.001,
     "kd": 7.0,
     "output_limits": [-40, 40],
     "integral_limits": [-5, 5],
