@@ -1,47 +1,38 @@
-"""
-Lightweight logging utilities for recording control loop data.
-Designed for robotics applications where high-frequency logging
-must be efficient, structured, and easy to analyze later.
-"""
-
 import csv
 import time
 from pathlib import Path
-
+from utils.log_profiles import FULL_PID_PROFILE, SUPERVISORY_PROFILE
 
 class DataLogger:
-    """
-    CSV-based logger for recording control loop data.
-    Each call to log() writes one row of structured data.
-    """
-
-    def __init__(self, filename="flight_log.csv", directory="logs"):
-        # Create logs directory if needed
+    def __init__(self, filename="flight_log.csv", directory="logs", mode="full_pid"):
         self.log_dir = Path(directory)
         self.log_dir.mkdir(exist_ok=True)
 
-        # Timestamped filename for uniqueness
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         self.filepath = self.log_dir / f"{timestamp}_{filename}"
 
-        # File handle and CSV writer
         self.file = open(self.filepath, "w", newline="")
-        self.writer = None
-        self.header_written = False
 
-    def log(self, data: dict):
-        """
-        Log a dictionary of values.
-        Keys become column headers on first write.
-        """
-        if not self.header_written:
-            self.writer = csv.DictWriter(self.file, fieldnames=list(data.keys()))
-            self.writer.writeheader()
-            self.header_written = True
+        # Select profile
+        if mode == "full_pid":
+            self.fields = FULL_PID_PROFILE
+        elif mode == "supervisory":
+            self.fields = SUPERVISORY_PROFILE
+        else:
+            raise ValueError(f"Unknown logging mode: {mode}")
 
-        self.writer.writerow(data)
+        # Write header immediately
+        self.writer = csv.DictWriter(self.file, fieldnames=list(self.fields.keys()))
+        self.writer.writeheader()
+
+    def log_frame(self, context):
+        """Log a single control-loop frame using the selected profile."""
+        try:
+            row = {name: extractor(context) for name, extractor in self.fields.items()}
+            self.writer.writerow(row)
+        except Exception as e:
+            print(f"[LOG ERROR] Failed to write row: {e}")
 
     def close(self):
-        """Close the log file."""
         if not self.file.closed:
             self.file.close()
