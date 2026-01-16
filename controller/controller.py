@@ -2,6 +2,7 @@ import time
 from .state_estimator import StateEstimator
 from control.pid import pid_x, pid_y, pid_z, pid_yaw
 from utils.logger import DataLogger
+from utils.log_context import LogContext, PIDOutputs, RCOutputs
 
 
 class Controller:
@@ -23,7 +24,13 @@ class Controller:
         """
         self.drone = drone_interface
         self.state_estimator = StateEstimator()
-        self.logger = DataLogger(filename="pid_flight.csv")
+
+        # Logger now handles frequency internally
+        self.logger = DataLogger(
+            filename="pid_flight.csv",
+            mode="full_pid",
+            log_every_n=5   # ~5 Hz logging at 25 Hz loop
+        )
 
         # Desired hover point (x=0, y=0, z=target_altitude)
         self.setpoint = {
@@ -41,9 +48,6 @@ class Controller:
 
         # Initialize yaw target (set properly after takeoff)
         self.target_yaw = None
-
-        self.log_counter = 0
-        self.log_every_n = 5  # log at ~5 Hz if loop is 25 Hz
 
     def start(self):
         """Initialize drone and begin control loop."""
@@ -73,6 +77,7 @@ class Controller:
             print("Exiting...")
             print("Landing...")
             self.drone.land()
+            self.logger.close()
 
     @staticmethod
     def _angle_difference(target, current):
@@ -113,27 +118,6 @@ class Controller:
             vx = est.velocity[0]
             vy = est.velocity[1]
 
-            # ------------------------------------------------------------
-            # Velocity damping (feed‑forward D-on-velocity term)
-            #
-            # History of tested values:
-            #   15.0 → First implementation. Provided strong drift suppression,
-            #           but logs showed it frequently overpowered the Tello’s
-            #           internal stabilization loop, causing lateral “fighting”
-            #           and occasional altitude coupling.
-            #
-            #   10.0 → Reduced aggressiveness. This eliminated the worst
-            #           controller conflicts, but flight logs still showed
-            #           mild forward/right drift and noticeable Z‑axis bounce
-            #           when the drone tilted to correct position error.
-            #
-            # Next test value:
-            #    8.0 → Further softening the damping term to reduce the
-            #           amount of thrust lost to tilt‑induced compensation.
-            #           The goal is to keep horizontal corrections effective
-            #           while reducing vertical oscillation and improving
-            #           hover smoothness.
-            # ------------------------------------------------------------
             vel_damping_gain = 8.0
 
             # --- X/Y/Z PID corrections ---
@@ -143,54 +127,28 @@ class Controller:
 
             # --- Yaw PID correction ---
             yaw_error = self._angle_difference(self.target_yaw, est.attitude[2])
-            yaw_cmd = pid_yaw.compute(0.0, yaw_error)  # setpoint = 0 (no yaw error)
+            yaw_cmd = pid_yaw.compute(0.0, yaw_error)
 
-            # Yaw-rate damping (helps prevent yaw drift and overshoot)
+            # Yaw-rate damping
             yaw_rate = est.angular_velocity[2]
-            yaw_damping_gain = 0.7  # was 0.5
+            yaw_damping_gain = 0.7
             yaw_cmd -= yaw_damping_gain * yaw_rate
 
             # ---------------------------------------
-            # 4. Log data (now includes loop_dt)
+            # 4. Build logging context and log frame
             # ---------------------------------------
             elapsed = time.time() - loop_start
 
-            self.log_counter += 1
-            if self.log_counter % self.log_every_n == 0:
-                self.logger.log({
-                    "time": timestamp,
-                    "loop_dt": elapsed,
-                    "x": est.position[0],
-                    "y": est.position[1],
-                    "z": est.position[2],
-                    "vx": est.velocity[0],
-                    "vy": est.velocity[1],
-                    "vz": est.velocity[2],
-                    "pitch": est.attitude[0],
-                    "roll": est.attitude[1],
-                    "yaw": est.attitude[2],
-                    "pid_x": lr_cmd,
-                    "pid_y": fb_cmd,
-                    "pid_z": ud_cmd,
-                    "rc_lr": lr_cmd,
-                    "rc_fb": fb_cmd,
-                    "rc_ud": ud_cmd,
-                    "rc_yaw": yaw_cmd,
-                    "tof_cm": raw_state.elevation[0],
-                    "barometer_m": raw_state.elevation[1],
-                    "height_cm": raw_state.elevation[2],
-                    "agx": raw_state.acceleration[0],
-                    "agy": raw_state.acceleration[1],
-                    "agz": raw_state.acceleration[2],
-                    "vel_raw_x": raw_state.velocity[0],
-                    "vel_raw_y": raw_state.velocity[1],
-                    "vel_raw_z": raw_state.velocity[2],
-                    "pitch_raw": raw_state.orientation[0],
-                    "roll_raw": raw_state.orientation[1],
-                    "yaw_raw": raw_state.orientation[2],
-                    "pid_yaw": yaw_cmd,
-                    "battery": raw_state.battery
-                })
+            ctx = LogContext(
+                timestamp=timestamp,
+                loop_dt=elapsed,
+                est=est,
+                raw=raw_state,
+                pid=PIDOutputs(lr_cmd, fb_cmd, ud_cmd, yaw_cmd),
+                rc=RCOutputs(lr_cmd, fb_cmd, ud_cmd, yaw_cmd)
+            )
+
+            self.logger.log_frame(ctx)
 
             # ---------------------------------------
             # 5. Send RC command to drone
